@@ -4,7 +4,6 @@
 
 #include "credentials.h"
 #include "controller.h"
-
 #include "messages.h"
 #include "mqtt.h"
 #include "power.h"
@@ -20,7 +19,7 @@
 */
 static const char * subscription_list[] = {
 	"~/~/whatever",
-    nullptr
+	nullptr
 };
 
 /*
@@ -28,12 +27,16 @@ static const char * subscription_list[] = {
 	in every tier.  Define a function here, in the global space, and inject it with mqtt.set_callback() below.
 */
 void messageHandler(char * topic, char * payload) {
-    Serial.println("\n\tWE GOT A GENERAL MESSAGE:");
-    Serial.print("\ttopic: ");
-    Serial.print(topic);
-    Serial.print("\t\tpayload: ");
-    Serial.println(payload);
+	// Serial.println("\n\tWE GOT A GENERAL MESSAGE:");
+	// Serial.print("\ttopic: ");
+	// Serial.print(topic);
+	// Serial.print("\t\tpayload: ");
+	// Serial.println(payload);
+
+	// DO SOMETHING
+
 }
+
 
 
 /* 
@@ -43,9 +46,11 @@ void messageHandler(char * topic, char * payload) {
 	~/{group}/command/+ and ~/{group}/command/+/+ at connect time.
 */
 static const char * command_namespaces[] = {
-	"trump",
-	nullptr
+	"test_subscription",
+	nullptr		// keep this as the last element of the array - the code uses it to find the end of the list
 };
+
+
 
 /*
 	4A)  If you want to take advantage of the command builder, create a separate function here (in the global space) and inject
@@ -55,32 +60,42 @@ static const char * command_namespaces[] = {
 	see "url" for more.
 */
 bool commandHandler(const char * topic, const char * payload, char * error) {
-    Serial.println("\n\tWE GOT A COMMAND:");
-    Serial.print("\ttopic: ");
-    Serial.print(topic);
-    Serial.print("\t\tpayload: ");
-    Serial.println(payload);
-	if (strcmp(topic, "trump") == 0) Serial.print("SUCCESS");
-    return true;
+	// Serial.println("\n\tWE GOT A COMMAND:");
+	// Serial.print("\ttopic: ");
+	// Serial.print(topic);
+	// Serial.print("\t\tpayload: ");
+	// Serial.println(payload);
+
+	if (strcmp(topic, "test_subscription") == 0) {
+		
+		Serial.print("SUCCESS - test_subscription worked");
+
+		// do something
+
+	}
+
+	return true;
+
 }
+
 
 
 /*
 	5A)  Settings.  Values stored on the device and editable from the device
 	dashboard.  Three parts:
 
-	  i.   One buffer per setting.  The initializer is the compiled default.
-	       Buffer names are yours — the cloud never sees them.  Anything you
-	       use as a number also gets a typed variable.
+		i.	  One buffer per setting.  The initializer is the compiled default.
+			Buffer names are yours — the cloud never sees them.  Anything you
+			use as a number also gets a typed variable.
 
-	  ii.  A table mapping each dashboard key to its buffer.  Keys: 15 chars
-	       max, no '/', '+', '#', or spaces.  End with the nullptr row, same
-	       as your subscription lists.
+		ii.	  A table mapping each dashboard key to its buffer.  Keys: 15 chars
+			max, no '/', '+', '#', or spaces.  End with the nullptr row, same
+			as your subscription lists.
 
-	  iii. A conversion function — re-derives every typed variable from its
-	       buffer.  No keys, no ifs; one line per numeric setting.  The
-	       framework calls it once at boot and again after every update.
-	       Strings need no line at all: the buffer IS the setting.
+	  	iii.  A conversion function — re-derives every typed variable from its
+			buffer.  No keys, no ifs; one line per numeric setting.  The
+			framework calls it once at boot and again after every update.
+			Strings need no line at all: the buffer IS the setting.
 
 	The framework does the rest: loads stored values from flash (or persists
 	your defaults on first boot), shows the settings on the dashboard, applies
@@ -91,7 +106,7 @@ bool commandHandler(const char * topic, const char * payload, char * error) {
 */
 char _threshold[SETTINGS_BUF_SIZE]  = "2.5";
 char _sleep_secs[SETTINGS_BUF_SIZE] = "30";
-char _mode[SETTINGS_BUF_SIZE]       = "auto";
+char _mode[SETTINGS_BUF_SIZE]	   = "auto";
 
 float threshold;
 int   sleep_secs;
@@ -110,14 +125,21 @@ void settingsChanged() {
 }
 
 
+
 void setup() {
 
-    Serial.begin(115200);
-    Serial.println("\n\n\n+++++++++++  DEVICE BOOT  ++++++++++++++++++++++++++++++++++\n");
+	Serial.begin(115200);
+	Serial.println("\n\n\n+++++++++++  DEVICE BOOT  ++++++++++++++++++++++++++++++++++\n");
 
-    controller.setup(WIFI_SSID, WIFI_PASS, MQTT_USER, MQTT_PASS);     
+	controller.setup(WIFI_SSID, WIFI_PASS, MQTT_USER, MQTT_PASS);
+	// if you prefer to launch your device without WiFi credentials, you can provide MQTT only to the setup() function.
+	// un-comment this command below (and comment-out the one above, and skip #defining the WiFi credentials above);
+	// the provisioner will run on boot.  From any device, set the SSID to "DEVICE PROVISIONING", and navitage to 192.168.4.1
 
-    // 1B)
+	// controller.setup(MQTT_USER, MQTT_PASS);
+
+
+	// 1B)
 	mqtt.set_subscriptions(subscription_list);
 
 	/*
@@ -125,13 +147,13 @@ void setup() {
 		message hook.  In Scaler/Champion the framework router runs first and
 		only un-routed messages reach this handler.
 	*/
-    mqtt.set_callback(messageHandler);
+	mqtt.set_callback(messageHandler);
 
 	/*
 		3B) opt into command groups.  these are declared in the array at 1A-2,
 		alongside the direct subscriptions — same technique for both.
 	*/
-    mqtt.set_command_namespaces(command_namespaces);
+	mqtt.set_command_namespaces(command_namespaces);
 
 	// 4B) 
 	messages.set_command_handler(commandHandler);
@@ -144,9 +166,10 @@ void setup() {
 	*/
 	settings.begin(settings_table, settingsChanged);
 
-    // power.save();
+	// power.save();
 
-	// provisioner.set_pin(X);
+	// provisioner.set_pin(X);		// un-comment if you want to assign a pin for provisioning (delete this line if not)
+
 
 }
 
@@ -157,22 +180,13 @@ void loop() {
 
 	controller.loop();
 
-    if (mqtt.is_connected) {
+	if (mqtt.is_connected) {
 
 		// do something
 		
-    }
+	}
 
 	// power.sleep();
 
 }
 
-
-
-
-
-// TODO: Device ID randomness. _create_code() uses random(36) with no randomSeed(). On the ESP32 Arduino core random() is backed by the hardware RNG (esp_random()), so this is almost certainly fine — but given that a collision in an 8-char ID would be catastrophic in a multi-tenant system, it's worth a one-line confirmation that your core version routes random() to the HW RNG and not a deterministic newlib PRNG. If you ever have doubt, seed from esp_random() explicitly before the loo
-
-// TODO: events.increment() writes NVS on every wifi retry. wifi_retries increments each time reconnect() fires, which is every RECONNECT_INTERVAL (10 s) while offline — and each increment is a putUInt. A device stuck offline overnight writes the same key thousands of times. NVS has wear leveling, but this is the kind of thing that quietly kills flash on a long-deployed fleet. Consider accumulating retries/drops in RAM and flushing to NVS only on a clean reconnect (or on a timer), rather than on every attempt.
-
-// TODO:  do we need to lock the partition scheme as well?
