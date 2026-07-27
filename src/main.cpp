@@ -12,47 +12,38 @@
 
 
 
-
-
-// 1A) REGULAR SUBSCRIPTIONS AND MESSAGE HANDLING ----------------------------------
+// REGULAR SUBSCRIPTIONS AND MESSAGE HANDLING Part 1 ----------------------------------
 
 static const char * subscription_list[] = {
-	"~/~/whatever",
+	"~/~/cypress",
 	nullptr				// keep this
 };
 
 
 void messageHandler(char * topic, char * payload) {
-	// DO SOMETHING
+	Serial.println(payload);	// replace this with something more interesting when you are ready
 }
 
 
 
-
-// 2A) STRUCTURED COMMANDS ---------------------------------------------------------
+// STRUCTURED COMMANDS Part 1 ---------------------------------------------------------
 
 static const char * command_namespaces[] = {
-	"namespace1",
-	"namespace2",
+	"arborvitae",
+	"dogwood",
 	nullptr			// keep this
 };
 
 
 bool commandHandler(const char * sub_topic, const char * payload, char * error) {
-	if (strcmp(sub_topic, "namespace1") == 0) {		
-		// do something
-		return true;
-	}
-	if (strcmp(sub_topic, "namespace2") == 0) {		
-		// do something else
-		return true;
-	}
-	return false;
+	Serial.println(payload);	// replace this with something more interesting when you are ready
+	return true;	// return false if the command couldn't be processed
+					// write a string into the error buffer if you want to return a error message
 }
 
 
 
-//	3A) SETTINGS -------------------------------------------------------------------
+//	SETTINGS Part 1 -------------------------------------------------------------------
 
 char _threshold[SETTINGS_BUF_SIZE]  = "2.5";
 char _sleep_secs[SETTINGS_BUF_SIZE] = "30";
@@ -84,21 +75,19 @@ void setup() {
 	controller.setup(WIFI_SSID, WIFI_PASS, MQTT_USER, MQTT_PASS);
 	// controller.setup(MQTT_USER, MQTT_PASS);		// auto-launches the provisioner
 
-	
-	// 1B) REGULAR SUBSCRIPTIONS AND MESSAGE HANDLING -----------------------------------
-	
+	// REGULAR SUBSCRIPTIONS AND MESSAGE HANDLING Part 2 -----------------------------------
 	mqtt.set_subscriptions(subscription_list);
 	mqtt.set_callback(messageHandler);
 
-	// 2B) STRUCTURED COMMANDS ----------------------------------------------------------
-
+	// STRUCTURED COMMANDS Part 2 ----------------------------------------------------------
 	mqtt.set_command_namespaces(command_namespaces);
 	messages.set_command_handler(commandHandler);
-	//	3A) SETTINGS --------------------------------------------------------------------
+	
+	//	SETTINGS Part 2 --------------------------------------------------------------------
 	settings.begin(settings_table, settingsChanged);
 
 	// provisioner.set_pin(X);		// un-comment if you want to assign a pin for provisioning (delete this line if not)
-
+	
 }
 
 
@@ -113,8 +102,6 @@ void loop() {
 		// do something
 		
 	}
-
-	// power.sleep();
 
 }
 
