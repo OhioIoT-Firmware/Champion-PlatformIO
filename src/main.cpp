@@ -2,11 +2,6 @@
 
 #include "credentials.h"
 #include "controller.h"
-#include "messages.h"
-#include "mqtt.h"
-#include "power.h"
-#include "provisioner.h"
-#include "settings.h"
 
 
 
